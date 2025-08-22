@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Search Configuration</title>
+    <th:block th:replace="fragments/fragments :: head"></th:block>
+    <style>
+        .main-container {
+            padding: 20px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-section h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-section .subtitle {
+            margin-top: 10px;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        .section-header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            line-height: 1.5;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group textarea:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            outline: none;
+        }
+
+        .form-group textarea[name="facetsJson"] {
+            min-height: 200px;
+        }
+
+        .form-group textarea[name="synonyms"] {
+            min-height: 150px;
+        }
+
+        .form-helper {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #666;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .form-helper svg {
+            width: 16px;
+            height: 16px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-self: flex-start;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .config-preview {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .config-preview h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-example {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #495057;
+            overflow-x: auto;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+        }
+
+        .json-syntax {
+            color: #0066cc;
+        }
+
+        .json-key {
+            color: #d73a49;
+        }
+
+        .json-string {
+            color: #032f62;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/fragments :: header"></div>
+<div th:replace="fragments/fragments :: sidebar"></div>
+
+<div class="main-container">
+    <!-- Header Section -->
+    <div class="header-section">
+        <h1>
+            <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            Search Configuration
+        </h1>
+        <div class="subtitle">Configure search facets and synonyms to improve search functionality</div>
+    </div>
+
+    <!-- Configuration Form -->
+    <div class="form-section">
+        <div class="section-header">
+            <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+            </svg>
+            Search Settings
+        </div>
+
+        <form th:action="@{/search}" method="post">
+            <input type="hidden" name="id" th:value="${cfg.id}" />
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>
+                        <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+                        </svg>
+                        Search Facets (JSON Format)
+                    </label>
+                    <textarea name="facetsJson" rows="8" cols="80" th:text="${cfg.facetsJson}"
+                              placeholder='{"categories": ["Electronics", "Books"], "brands": ["Apple", "Samsung"]}'></textarea>
+                    <div class="form-helper">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        Define search filters as JSON. Each key represents a facet category with an array of possible values.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Search Synonyms (One per line)
+                    </label>
+                    <textarea name="synonyms" rows="6" cols="80" th:text="${cfg.synonyms}"
+                              placeholder="phone,mobile,smartphone&#10;laptop,computer,notebook&#10;car,vehicle,automobile"></textarea>
+                    <div class="form-helper">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        Enter related terms on each line, separated by commas. This helps users find items using different terminology.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Examples -->
+            <div class="config-preview">
+                <h3>
+                    <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Example Configuration
+                </h3>
+                <div class="config-example">
+                    <span class="json-syntax">{</span>
+                    <span class="json-key">"categories"</span><span class="json-syntax">:</span> [<span class="json-string">"Electronics"</span>, <span class="json-string">"Books"</span>, <span class="json-string">"Clothing"</span>],
+                    <span class="json-key">"brands"</span><span class="json-syntax">:</span> [<span class="json-string">"Apple"</span>, <span class="json-string">"Samsung"</span>, <span class="json-string">"Sony"</span>],
+                    <span class="json-key">"price_range"</span><span class="json-syntax">:</span> [<span class="json-string">"0-50"</span>, <span class="json-string">"50-100"</span>, <span class="json-string">"100+"</span>]
+                    <span class="json-syntax">}</span>
+
+                    <span style="color: #6a737d;">// Synonyms example:</span>
+                    phone,mobile,smartphone,cellphone
+                    laptop,computer,notebook,pc
+                    car,vehicle,automobile,auto
+                </div>
+            </div>
+
+            <button type="submit" class="btn">
+                <svg class="icon" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                </svg>
+                Save Configuration
+            </button>
+        </form>
+    </div>
+</div>
+
+<script th:replace="fragments/fragments :: sidebar-script"></script>
+<div th:replace="fragments/fragments :: footer"></div>
+</body>
+</html>

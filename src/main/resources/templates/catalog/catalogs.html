@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Procurement - Catalog Administration</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #28a745;
+            --secondary-green: #20c997;
+            --dark-green: #1e7e34;
+            --light-green: #d4edda;
+            --text-dark: #2d3436;
+            --border-color: #e9ecef;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 0;
+            margin: 0;
+        }
+
+        /* Main Content - Remove excessive margins */
+        .main-content {
+            margin-left: 0;
+            margin-top: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* Only apply sidebar margin when sidebar exists */
+        .has-sidebar .main-content {
+            margin-left: var(--sidebar-width);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Form Styles */
+        .form-control {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        .form-label {
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success {
+            background: var(--secondary-green);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: #17a085;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border: none;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            color: #212529;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            color: var(--text-dark);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem 0.75rem;
+        }
+
+        .table td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: var(--light-green);
+            color: var(--dark-green);
+        }
+
+        .status-draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-expired {
+            background: #f1f3f4;
+            color: #5f6368;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h5 {
+            margin-bottom: 1rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .page-header {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+    <th:block th:replace="fragments/fragments :: head"></th:block>
+</head>
+<body>
+<!-- Use fragments for header and sidebar -->
+<div th:replace="fragments/fragments :: header"></div>
+<div th:replace="fragments/fragments :: sidebar"></div>
+
+<!-- Main Content -->
+<div class="main-content" th:classappend="${hasSidebar} ? 'has-sidebar' : ''">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="page-title">
+                    <i class="fas fa-book me-3"></i>Catalog Administration
+                </h1>
+                <p class="page-subtitle mb-0">
+                    Manage your product catalogs, create new catalogs, and control catalog status
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button type="button" class="btn btn-light" onclick="scrollToCreateForm()">
+                    <i class="fas fa-plus me-2"></i>Create New Catalog
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Create Catalog Form -->
+    <div class="content-card" id="createForm">
+        <div class="card-header">
+            <i class="fas fa-plus-circle me-2"></i>
+            Create New Catalog
+        </div>
+        <div class="card-body">
+            <form th:action="@{/catalogs}" method="post" class="row g-3" id="catalogForm">
+                <div class="col-md-3">
+                    <label for="code" class="form-label">
+                        <i class="fas fa-barcode me-1"></i> Code <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="code" name="code" required
+                           maxlength="20" placeholder="e.g., CAT001">
+                    <div class="form-text">Unique identifier for the catalog</div>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="name" class="form-label">
+                        <i class="fas fa-tag me-1"></i> Name <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="name" name="name" required
+                           maxlength="100" placeholder="e.g., Office Supplies">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="description" class="form-label">
+                        <i class="fas fa-info-circle me-1"></i> Description
+                    </label>
+                    <input type="text" class="form-control" id="description" name="description"
+                           maxlength="255" placeholder="Brief description of the catalog">
+                </div>
+
+                <div class="col-md-2">
+                    <label for="status" class="form-label">
+                        <i class="fas fa-toggle-on me-1"></i> Status <span class="text-danger">*</span>
+                    </label>
+                    <select id="status" name="status" class="form-control" required>
+                        <option value="DRAFT" selected>DRAFT</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                        <option value="EXPIRED">EXPIRED</option>
+                    </select>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Create Catalog
+                    </button>
+                    <button type="reset" class="btn btn-secondary ms-2">
+                        <i class="fas fa-undo me-1"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Catalogs Table -->
+    <div class="content-card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <i class="fas fa-list me-2"></i>
+                    Catalog List
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-light text-dark" th:text="${catalogs != null ? catalogs.size() : 0} + ' Total'">0 Total</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <!-- Table with catalogs -->
+            <div class="table-responsive" th:if="${catalogs != null and not #lists.isEmpty(catalogs)}">
+                <table class="table table-hover data-table">
+                    <thead>
+                    <tr>
+                        <th><i class="fas fa-code me-1"></i>Code</th>
+                        <th><i class="fas fa-tag me-1"></i>Name</th>
+                        <th><i class="fas fa-align-left me-1"></i>Description</th>
+                        <th><i class="fas fa-toggle-on me-1"></i>Status</th>
+                        <th><i class="fas fa-calendar me-1"></i>Created</th>
+                        <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="catalog : ${catalogs}">
+                        <td>
+                            <strong th:text="${catalog.code}">CAT001</strong>
+                        </td>
+                        <td th:text="${catalog.name}">Office Supplies</td>
+                        <td>
+                                <span th:text="${catalog.description != null and #strings.isNotEmpty(catalog.description) ? catalog.description : 'No description'}"
+                                      th:class="${catalog.description != null and #strings.isNotEmpty(catalog.description) ? '' : 'text-muted fst-italic'}">
+                                    Description
+                                </span>
+                        </td>
+                        <td>
+                                <span class="status-badge"
+                                      th:class="${'status-badge ' + (catalog.status != null ? 'status-' + catalog.status.name().toLowerCase() : 'status-draft')}"
+                                      th:text="${catalog.status != null ? catalog.status : 'DRAFT'}">
+                                    DRAFT
+                                </span>
+                        </td>
+                        <td>
+                                <span th:text="${catalog.effectiveFrom != null ? #temporals.format(catalog.effectiveFrom, 'MMM dd, yyyy HH:mm') : 'Not set'}"
+                                      class="text-muted">
+                                    Mar 15, 2024 10:30
+                                </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <!-- Activate Button -->
+                                <form th:if="${catalog.status.name() != 'ACTIVE'}"
+                                      th:action="@{'/catalogs/' + ${catalog.id} + '/activate'}"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm"
+                                            title="Activate Catalog"
+                                            onclick="return confirm('Are you sure you want to activate this catalog?')">
+                                        <i class="fas fa-play me-1"></i>Activate
+                                    </button>
+                                </form>
+
+                                <!-- Deactivate Button -->
+                                <form th:if="${catalog.status.name() == 'ACTIVE'}"
+                                      th:action="@{'/catalogs/' + ${catalog.id} + '/deactivate'}"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-warning btn-sm"
+                                            title="Deactivate Catalog"
+                                            onclick="return confirm('Are you sure you want to deactivate this catalog?')">
+                                        <i class="fas fa-pause me-1"></i>Deactivate
+                                    </button>
+                                </form>
+
+                                <!-- Edit Button -->
+                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                        title="Edit Catalog"
+                                        th:attr="data-id=${catalog.id},data-code=${catalog.code},data-name=${catalog.name},data-description=${catalog.description},data-status=${catalog.status}"
+                                        onclick="editCatalog(this.dataset.id, this.dataset.code, this.dataset.name, this.dataset.description, this.dataset.status)">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+
+                                <!-- View Details Button -->
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        title="View Details"
+                                        th:attr="data-id=${catalog.id}"
+                                        onclick="viewCatalogDetails(this.dataset.id)">
+                                    <i class="fas fa-eye me-1"></i>Details
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State - Only shows message, no create button -->
+            <div th:if="${catalogs == null or #lists.isEmpty(catalogs)}" class="empty-state">
+                <i class="fas fa-book"></i>
+                <h5>No Catalogs Found</h5>
+                <p>Get started by creating your first catalog using the form above.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Scroll to create form
+    function scrollToCreateForm() {
+        document.getElementById('createForm').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('code').focus();
+    }
+
+    // Edit catalog function
+    function editCatalog(id, code, name, description, status) {
+        // Populate form with existing data
+        document.getElementById('code').value = code;
+        document.getElementById('name').value = name;
+        document.getElementById('description').value = description || '';
+        document.getElementById('status').value = status;
+
+        // Change form action to update
+        const form = document.getElementById('catalogForm');
+        form.action = '/catalogs/' + id + '/update';
+
+        // Change button text
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-save me-1"></i> Update Catalog';
+
+        // Add hidden method field for PUT request
+        let methodInput = form.querySelector('input[name="_method"]');
+        if (!methodInput) {
+            methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            form.appendChild(methodInput);
+        }
+        methodInput.value = 'PUT';
+
+        // Scroll to form
+        scrollToCreateForm();
+    }
+
+    // View catalog details
+    function viewCatalogDetails(id) {
+        // Navigate to details page or show modal
+        window.location.href = '/catalogs/' + id;
+    }
+
+    // Form validation and enhancement
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('catalogForm');
+        const codeInput = document.getElementById('code');
+        const nameInput = document.getElementById('name');
+
+        // Convert code to uppercase as user types
+        codeInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        });
+
+        // Trim whitespace from name
+        nameInput.addEventListener('blur', function() {
+            this.value = this.value.trim();
+        });
+
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            const code = codeInput.value.trim();
+            const name = nameInput.value.trim();
+
+            if (!code) {
+                e.preventDefault();
+                alert('Please enter a catalog code.');
+                codeInput.focus();
+                return;
+            }
+
+            if (!name) {
+                e.preventDefault();
+                alert('Please enter a catalog name.');
+                nameInput.focus();
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+            submitBtn.disabled = true;
+
+            // Re-enable button after 5 seconds (fallback)
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 5000);
+        });
+
+        // Reset form functionality
+        const resetBtn = form.querySelector('button[type="reset"]');
+        resetBtn.addEventListener('click', function() {
+            // Reset form action and button text
+            form.action = '/catalogs';
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-save me-1"></i> Create Catalog';
+
+            // Remove method input if exists
+            const methodInput = form.querySelector('input[name="_method"]');
+            if (methodInput) {
+                methodInput.remove();
+            }
+
+            setTimeout(() => {
+                codeInput.focus();
+            }, 100);
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                const closeBtn = alert.querySelector('.btn-close');
+                if (closeBtn) {
+                    closeBtn.click();
+                }
+            }, 5000);
+        });
+    });
+</script>
+
+<!-- Fragment scripts -->
+<script th:replace="fragments/fragments :: sidebar-script"></script>
+<div th:replace="fragments/fragments :: footer"></div>
+</body>
+</html>

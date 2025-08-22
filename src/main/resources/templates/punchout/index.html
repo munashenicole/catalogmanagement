@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Punchout Configuration - Cicosy Tools</title>
+    <th:block th:replace="fragments/fragments :: head"></th:block>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50px, -50px);
+        }
+
+        .page-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 32px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-header p {
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .header-actions {
+            z-index: 1;
+        }
+
+        .stats-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .form-select {
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f9fafb;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .data-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-enabled {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+
+        .status-disabled {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+
+        .protocol-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
+        }
+
+        .response-container {
+            margin-top: 16px;
+        }
+
+        .response-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .response-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #9ca3af;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .info-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #1d4ed8;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .info-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .info-card p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #374151;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #22c55e;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .page-header {
+                padding: 24px;
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .data-table {
+                font-size: 12px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/fragments :: header"></div>
+<div th:replace="fragments/fragments :: sidebar"></div>
+
+<div class="main-content">
+    <div class="page-header">
+        <div>
+            <h1>
+                <span>🔗</span>
+                Punchout Configuration
+            </h1>
+            <p>Configure punchout protocols and endpoints for catalog integration</p>
+        </div>
+        <div class="header-actions">
+            <span class="stats-badge">
+                <span th:text="${#lists.size(configs)}">0</span> Configurations
+            </span>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <h3>💡 About Punchout</h3>
+        <p>Punchout enables seamless integration with procurement systems using cXML or OCI protocols. Configure endpoints and authentication details to connect your catalogs with external systems.</p>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-icon">⚙️</div>
+            <h2 class="section-title">Create / Update Configuration</h2>
+        </div>
+
+        <form id="cfgForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="catalogId">Catalog ID *</label>
+                    <input type="number"
+                           id="catalogId"
+                           name="catalogId"
+                           class="form-input"
+                           placeholder="e.g., 1"
+                           required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="endpointUrl">Endpoint URL *</label>
+                    <input type="url"
+                           id="endpointUrl"
+                           name="endpointUrl"
+                           class="form-input"
+                           placeholder="https://example.com/punchout"
+                           required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="identity">Identity *</label>
+                    <input type="text"
+                           id="identity"
+                           name="identity"
+                           class="form-input"
+                           placeholder="Unique identity string"
+                           required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="sharedSecret">Shared Secret *</label>
+                    <input type="password"
+                           id="sharedSecret"
+                           name="sharedSecret"
+                           class="form-input"
+                           placeholder="Authentication secret"
+                           required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="protocol">Protocol</label>
+                    <select id="protocol" name="protocol" class="form-select">
+                        <option value="cXML">cXML</option>
+                        <option value="OCI">OCI</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="enabled">Status</label>
+                    <select id="enabled" name="enabled" class="form-select">
+                        <option value="true">Enabled</option>
+                        <option value="false">Disabled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success" id="saveBtn">
+                    <span>💾</span>
+                    Save Configuration
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                    <span>🔄</span>
+                    Clear Form
+                </button>
+            </div>
+        </form>
+
+        <div id="response-container" class="response-container" style="display: none;"></div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-icon">📋</div>
+            <h2 class="section-title">Configuration List</h2>
+        </div>
+
+        <div class="table-container" th:if="${not #lists.isEmpty(configs)}">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Catalog ID</th>
+                    <th>Endpoint</th>
+                    <th>Identity</th>
+                    <th>Protocol</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cfg : ${configs}">
+                    <td>
+                        <strong th:text="${cfg.catalogId}">1</strong>
+                    </td>
+                    <td>
+                        <div class="endpoint-url" th:text="${cfg.endpointUrl}">https://example.com/punchout</div>
+                    </td>
+                    <td th:text="${cfg.identity}">identity</td>
+                    <td>
+                        <span class="protocol-badge" th:text="${cfg.protocol}">cXML</span>
+                    </td>
+                    <td>
+                            <span th:class="${cfg.enabled} ? 'status-badge status-enabled' : 'status-badge status-disabled'">
+                                <span th:if="${cfg.enabled}">✓ Enabled</span>
+                                <span th:unless="${cfg.enabled}">✗ Disabled</span>
+                            </span>
+                    </td>
+                    <td>
+                        <a th:href="@{'/punchout/redirect/' + ${cfg.catalogId}}"
+                           class="btn btn-success"
+                           style="padding: 6px 12px; font-size: 12px;"
+                           target="_blank">
+                            🔗 Test Redirect
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(configs)}">
+            <div class="empty-state-icon">🔧</div>
+            <h3>No Configurations Yet</h3>
+            <p>Create your first punchout configuration to enable catalog integration.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('cfgForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const saveBtn = document.getElementById('saveBtn');
+        const responseContainer = document.getElementById('response-container');
+        const form = e.target;
+
+        // Show loading state
+        saveBtn.innerHTML = '<span class="loading-spinner"></span> Saving...';
+        saveBtn.disabled = true;
+
+        const dto = {
+            catalogId: Number(form.catalogId.value),
+            endpointUrl: form.endpointUrl.value,
+            identity: form.identity.value,
+            sharedSecret: form.sharedSecret.value,
+            protocol: form.protocol.value,
+            enabled: form.enabled.value === 'true'
+        };
+
+        try {
+            const response = await fetch('/punchout/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dto)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                responseContainer.innerHTML = `
+                <div class="response-success">
+                    <strong>✅ Success!</strong> Punchout configuration saved successfully.
+                    <br><small>Catalog ID: ${result.catalogId} | Protocol: ${result.protocol} | Status: ${result.enabled ? 'Enabled' : 'Disabled'}</small>
+                </div>
+            `;
+
+                // Reload page after short delay to show updated list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save configuration');
+            }
+
+        } catch (error) {
+            responseContainer.innerHTML = `
+            <div class="response-error">
+                <strong>❌ Error:</strong> ${error.message}
+            </div>
+        `;
+        } finally {
+            // Reset button state
+            saveBtn.innerHTML = '<span>💾</span> Save Configuration';
+            saveBtn.disabled = false;
+            responseContainer.style.display = 'block';
+        }
+    });
+
+    function clearForm() {
+        document.getElementById('cfgForm').reset();
+        const responseContainer = document.getElementById('response-container');
+        responseContainer.style.display = 'none';
+    }
+
+    // Auto-hide success messages after 3 seconds
+    setTimeout(() => {
+        const successMessages = document.querySelectorAll('.response-success');
+        successMessages.forEach(msg => {
+            if (msg.style.display !== 'none') {
+                msg.style.opacity = '0.5';
+            }
+        });
+    }, 3000);
+</script>
+
+<script th:replace="fragments/fragments :: sidebar-script"></script>
+<div th:replace="fragments/fragments :: footer"></div>
+</body>
+</html>
