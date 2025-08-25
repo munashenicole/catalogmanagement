@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -32,10 +34,7 @@ public class Catalog {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private CatalogStatus status;
-
-    @Column(name = "is_active", nullable = false)
-    private boolean active;
+    private CatalogStatus status = CatalogStatus.DRAFT;
 
     @Column(name = "effective_from")
     private LocalDateTime effectiveFrom;
@@ -43,33 +42,15 @@ public class Catalog {
     @Column(name = "effective_to")
     private LocalDateTime effectiveTo;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-
-    @Column(name = "created_date", updatable = false)
-    private LocalDateTime createdDate;
-
+    @UpdateTimestamp
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
 
-    @PrePersist
-    protected void onCreate() {
-        if (status == null) {
-            status = CatalogStatus.DRAFT;
-        }
-        if (effectiveFrom == null && status == CatalogStatus.ACTIVE) {
-            effectiveFrom = LocalDateTime.now();
-        }
-        active = (status == CatalogStatus.ACTIVE);
-        createdAt = LocalDateTime.now();
-        createdDate = LocalDateTime.now();
-        lastModifiedDate = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        active = (status == CatalogStatus.ACTIVE);
-        lastModifiedDate = LocalDateTime.now();
+    public boolean isActive() {
+        return this.status == CatalogStatus.ACTIVE;
     }
 }
