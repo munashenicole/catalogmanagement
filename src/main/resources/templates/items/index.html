@@ -1,188 +1,180 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Item Management</title>
-    <th:block th:replace="fragments/fragments :: head"></th:block>
+    <th:block th:replace="~{fragments/fragments :: head}"></th:block>
     <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1 0 auto;
+        }
+        .footer-container {
+            flex-shrink: 0;
+        }
         .header-section {
             background: linear-gradient(135deg, #2E8B57, #4CAF50);
             color: white;
             padding: 2rem;
-            margin: -1rem -1rem 2rem -1rem;
-            border-radius: 0 0 1rem 1rem;
-        }
-
-        .header-section h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 2rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .header-section p {
-            margin: 0;
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-
-        .results-container {
-            background: white;
-            border: 1px solid #e0e0e0;
             border-radius: 0.5rem;
-            margin: 0 -1rem;
+            margin-bottom: 2rem;
+        }
+        .form-card, .table-card {
+            background: white;
+            border-radius: 0.5rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0;
-        }
-
-        .table th {
-            background: #f8f9fa;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
-            color: #495057;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .table td {
-            padding: 1rem;
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid #dee2e6;
-            vertical-align: middle;
+            font-weight: 600;
         }
-
-        .table tbody tr:hover {
-            background: #f8f9fa;
+        .card-body {
+            padding: 1.5rem;
         }
-
-        .preferred-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .preferred-yes {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .preferred-no {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .item-actions {
+        .action-buttons {
             display: flex;
             gap: 0.5rem;
-        }
-
-        .btn-toggle {
-            padding: 0.25rem 0.5rem;
-            border: none;
-            border-radius: 0.25rem;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-toggle-on {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-toggle-off {
-            background: #dc3545;
-            color: white;
-        }
-
-        body {
-            background: #f5f5f5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-
-        .icon {
-            width: 1.25rem;
-            height: 1.25rem;
         }
     </style>
 </head>
 <body>
-<div th:replace="fragments/fragments :: header"></div>
-<div th:replace="fragments/fragments :: sidebar"></div>
+<div th:replace="~{fragments/fragments :: header}"></div>
+<div th:replace="~{fragments/fragments :: sidebar}"></div>
 
-<div class="container">
-    <div class="header-section">
-        <h1>
-            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
-            </svg>
-            Item Management
-        </h1>
-        <p>A complete list of all catalog items.</p>
-    </div>
+<main class="main-content" id="mainContent">
+    <div class="container-fluid">
+        <div class="header-section">
+            <h1>Item Management</h1>
+            <p>A complete list of all catalog items.</p>
+        </div>
 
-    <div class="results-container">
-        <div class="table-container">
-            <table class="table data-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>SKU</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Preferred</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : ${items}">
-                    <td th:text="${item.id}">-</td>
-                    <td><code th:text="${item.sku}">-</code></td>
-                    <td><strong th:text="${item.name}">Unnamed Item</strong></td>
-                    <td th:text="${item.description}">-</td>
-                    <td>
-                        <span class="preferred-badge" th:classappend="${item.preferred} ? 'preferred-yes' : 'preferred-no'">
-                            <span th:if="${item.preferred}">
-                                <svg class="icon" fill="currentColor" viewBox="0 0 20 20" style="width: 0.8rem; height: 0.8rem;"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg> Yes
-                            </span>
-                            <span th:unless="${item.preferred}">
-                                <svg class="icon" fill="currentColor" viewBox="0 0 20 20" style="width: 0.8rem; height: 0.8rem;"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg> No
-                            </span>
-                        </span>
-                    </td>
-                    <td>
-                        <!-- Actions can be added here if needed -->
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <!-- Create/Edit Form -->
+        <div class="form-card" id="itemFormCard">
+            <div class="card-header" id="formCardHeader">Create New Item</div>
+            <div class="card-body">
+                <form th:action="@{/items}" method="post" id="itemForm" th:object="${itemDto}">
+                    <input type="hidden" th:field="*{id}" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="catalogId" class="form-label">Catalog</label>
+                            <select class="form-select" th:field="*{catalogId}" required>
+                                <option value="">Select a catalog...</option>
+                                <option th:each="cat : ${catalogs}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="sku" class="form-label">SKU</label>
+                            <input type="text" class="form-control" th:field="*{sku}" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" th:field="*{name}" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="listPrice" class="form-label">List Price</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{listPrice}" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="unitOfMeasure" class="form-label">Unit of Measure</label>
+                            <input type="text" class="form-control" th:field="*{unitOfMeasure}" />
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" th:field="*{preferred}" value="true">
+                        <label class="form-check-label" for="preferred">
+                            Preferred Item
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Item</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="table-card">
+            <div class="card-header">Item List</div>
+            <div class="card-body">
+                <table class="table table-striped data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th>Preferred</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${items}">
+                            <td th:text="${item.id}">-</td>
+                            <td th:text="${item.sku}">-</td>
+                            <td th:text="${item.name}">-</td>
+                            <td>
+                                <span th:if="${item.preferred}" class="badge bg-success">Yes</span>
+                                <span th:unless="${item.preferred}" class="badge bg-secondary">No</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-sm btn-primary" th:attr="onclick=|editItem(${item.id}, ${item.catalogId}, '${item.sku}', '${item.name}', '${item.description}', ${item.listPrice}, '${item.unitOfMeasure}', ${item.preferred})|">Edit</button>
+                                    <form th:action="@{'/items/' + ${item.id} + '/preferred'}" method="post" class="d-inline">
+                                        <input type="hidden" name="preferred" th:value="${!item.preferred}" />
+                                        <button type="submit" class="btn btn-sm" th:classappend="${item.preferred} ? 'btn-secondary' : 'btn-success'" th:text="${item.preferred} ? 'Unset Preferred' : 'Set Preferred'"></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
-<script th:replace="fragments/fragments :: sidebar-script"></script>
-<div th:replace="fragments/fragments :: footer"></div>
+<div th:replace="~{fragments/fragments :: footer}"></div>
+<script th:replace="~{fragments/fragments :: sidebar-script}"></script>
+<script>
+function resetForm() {
+    document.getElementById('itemForm').reset();
+    document.getElementById('itemForm').action = '/items';
+    document.getElementById('formCardHeader').textContent = 'Create New Item';
+    var idField = document.querySelector('#itemForm input[name="id"]');
+    if(idField) idField.value = '';
+}
+
+function editItem(id, catalogId, sku, name, description, listPrice, unitOfMeasure, preferred) {
+    document.getElementById('itemForm').action = '/items/' + id + '/update';
+    document.getElementById('formCardHeader').textContent = 'Edit Item ' + id;
+    
+    var idField = document.querySelector('#itemForm input[name="id"]');
+    if(idField) idField.value = id;
+    
+    document.querySelector('#itemForm select[name="catalogId"]').value = catalogId;
+    document.querySelector('#itemForm input[name="sku"]').value = sku;
+    document.querySelector('#itemForm input[name="name"]').value = name;
+    document.querySelector('#itemForm textarea[name="description"]').value = description || '';
+    document.querySelector('#itemForm input[name="listPrice"]').value = listPrice || '';
+    document.querySelector('#itemForm input[name="unitOfMeasure"]').value = unitOfMeasure || '';
+    document.querySelector('#itemForm input[name="preferred"]').checked = preferred;
+
+    document.getElementById('itemFormCard').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
 </body>
 </html>
