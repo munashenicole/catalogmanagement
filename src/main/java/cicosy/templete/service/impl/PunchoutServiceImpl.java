@@ -8,6 +8,7 @@ import cicosy.templete.repository.PunchoutConfigRepository;
 import cicosy.templete.service.PunchoutService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -18,6 +19,7 @@ public class PunchoutServiceImpl implements PunchoutService {
     private final CatalogRepository catalogRepository;
 
     @Override
+    @Transactional
     public PunchoutConfigDTO configure(PunchoutConfigDTO dto) {
         Catalog catalog = catalogRepository.findById(dto.catalogId()).orElseThrow();
         PunchoutConfig cfg = punchoutConfigRepository.findByCatalogId(dto.catalogId()).orElse(new PunchoutConfig());
@@ -47,6 +49,7 @@ public class PunchoutServiceImpl implements PunchoutService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public java.util.List<PunchoutConfigDTO> list() {
         return punchoutConfigRepository.findAll().stream()
             .map(cfg -> new PunchoutConfigDTO(
@@ -60,5 +63,3 @@ public class PunchoutServiceImpl implements PunchoutService {
             .toList();
     }
 }
-
-

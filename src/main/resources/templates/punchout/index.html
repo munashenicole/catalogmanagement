@@ -3,6 +3,7 @@
 <head>
     <title>Punchout Configuration - Cicosy Tools</title>
     <th:block th:replace="fragments/fragments :: head"></th:block>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.3/css/dataTables.dataTables.css" />
     <style>
         body {
             margin: 0;
@@ -12,7 +13,7 @@
         }
 
         .main-content {
-            margin-left: 250px;
+            margin-left: 0;
             padding: 24px;
             min-height: 100vh;
         }
@@ -375,7 +376,6 @@
 </head>
 <body>
 <div th:replace="fragments/fragments :: header"></div>
-<div th:replace="fragments/fragments :: sidebar"></div>
 
 <div class="main-content">
     <div class="page-header">
@@ -535,6 +535,13 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/2.3.3/js/dataTables.dataTables.js"></script>
+<script>
+    $(document).ready( function () {
+        $('.data-table').DataTable();
+    } );
+</script>
 <script>
     document.getElementById('cfgForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -616,7 +623,6 @@
     }, 3000);
 </script>
 
-<script th:replace="fragments/fragments :: sidebar-script"></script>
 <div th:replace="fragments/fragments :: footer"></div>
 </body>
 </html>
